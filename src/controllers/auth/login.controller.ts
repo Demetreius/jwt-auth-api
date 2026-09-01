@@ -1,15 +1,11 @@
 import { type Request, type Response } from 'express';
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db/index';
 import { usersTable } from '../../db/schema';
 import { type LoginInput } from '../../validators/auth.validator';
 import { sendResponse, sendError } from '../../utils/responses.utils';
-
-const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
-};
+import { generateToken } from '../../utils/token';
 
 export const loginController = async (
   req: Request<{}, {}, LoginInput>,
@@ -31,6 +27,16 @@ export const loginController = async (
     const isPasswordValid = await argon2.verify(user.password, password);
     if (!isPasswordValid) {
       return sendError(res, 401, 'Invalid email or password.', 'INVALID_CREDENTIALS');
+    }
+
+    // NEW: Check if the user's account is verified via OTP
+    if (user.isVerified !== 'true') {
+      return sendError(
+        res,
+        403,
+        'Account is not verified. Please verify your email with the OTP code.',
+        'ACCOUNT_NOT_VERIFIED'
+      );
     }
 
     const token = generateToken(user.id);

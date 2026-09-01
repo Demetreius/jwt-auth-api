@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { registerController } from '../controllers/auth/register.controller.js';
 import { loginController } from '../controllers/auth/login.controller.js';
-// import { verifyOtpController } from '../controllers/auth/verify-otp.controller';
+import { verifyOtpController } from '../controllers/auth/verify-otp.controller';
 import { 
   validate, 
   registerSchema, 
@@ -18,6 +18,6 @@ router.post('/register', validate(registerSchema), registerController);
 router.post('/login', validate(loginSchema), loginController);
 
 // POST /api/auth/verify-otp
-// router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpController);
+router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpController);
 
 export default router;
