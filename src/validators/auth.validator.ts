@@ -1,58 +1,52 @@
 import { z } from 'zod';
 import { type Request, type Response, type NextFunction } from 'express';
-import { OTP_TYPES } from '../constants/default.js';
+import { sendError } from '../utils/responses.utils';
 
-// 1. Registration Schema
+export const OTP_TYPES = ['EMAIL_VERIFICATION', 'PASSWORD_RESET'] as const;
+export type OtpType = typeof OTP_TYPES[number];
+
 export const registerSchema = z.object({
   email: z.email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
+  firstName: z.string().min(2, 'First name must be at least 2 characters long').max(100, 'First name must be at most 100 characters long'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters long').max(100, 'Last name must be at most 100 characters long'),
 });
 
-// 2. Login Schema
 export const loginSchema = z.object({
   email: z.email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
 });
 
-// 3. Verify OTP Schema (using .refine for custom enum error handling)
 export const verifyOtpSchema = z.object({
   email: z.email('Invalid email format'),
   code: z.string().length(6, 'Verification code must be exactly 6 digits'),
-  type: z.enum(OTP_TYPES).refine(
-    (val) => OTP_TYPES.includes(val),
-    { message: 'Invalid verification type' }
-  ),
+  type: z.enum(OTP_TYPES),
 });
 
-// 4. Resend OTP Schema
-export const resendOtpSchema = z.object({
-  email: z.email('Invalid email format'),
-  type: z.enum(OTP_TYPES).refine(
-    (val) => OTP_TYPES.includes(val),
-    { message: 'Invalid verification type' }
-  ),
-});
+// Infer TypeScript types from Zod schemas
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 
-// Generic validation middleware factory
 export const validate = (schema: z.ZodType) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Parse and strip out unexpected fields
       req.body = schema.parse(req.body);
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Validation failed',
-          details: error.issues.map((err) => ({
+        return sendError(
+          res,
+          400,
+          'Validation failed',
+          'VALIDATION_ERROR',
+          error.issues.map((err) => ({
             field: err.path.join('.'),
             message: err.message,
-          })),
-        });
+          }))
+        );
       }
-      return res.status(400).json({ error: 'Invalid request payload' });
+      return sendError(res, 400, 'Invalid request payload', 'INVALID_PAYLOAD');
     }
   };
 };

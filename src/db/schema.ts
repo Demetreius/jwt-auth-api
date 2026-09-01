@@ -1,4 +1,8 @@
-import { pgTable, uuid, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, uniqueIndex, pgEnum } from 'drizzle-orm/pg-core';
+
+
+export const verificationReasonEnum = pgEnum("verification_reason", ["EMAIL_VERIFICATION", "PASSWORD_RESET"]);
+
 
 // 1. Users Table
 export const usersTable = pgTable('users', {
@@ -29,11 +33,13 @@ export const refreshTokensTable = pgTable('refresh_tokens', {
 export const verificationCodesTable = pgTable('verification_codes', {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: uuid('user_id').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
-    code: text('code').notNull(), // The OTP string (e.g., 6-digit code)
-    type: text('type').notNull(), // e.g., 'EMAIL_VERIFICATION' or 'PASSWORD_RESET'
+    code: text('code').notNull(),
+    type: verificationReasonEnum(),
     expiresAt: timestamp('expires_at').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+
 
 // 4. TypeScript Type Exports
 export type User = typeof usersTable.$inferSelect;
