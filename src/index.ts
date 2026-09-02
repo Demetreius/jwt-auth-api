@@ -22,7 +22,6 @@ const setupSwagger = async () => {
     const swaggerDocument = await SwaggerParser.bundle(masterYamlPath);
 
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-    console.log('Swagger documentation loaded successfully from multiple files.');
   } catch (error) {
     console.error('Failed to load Swagger documentation:', error);
   }
@@ -33,6 +32,7 @@ setupSwagger();
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({

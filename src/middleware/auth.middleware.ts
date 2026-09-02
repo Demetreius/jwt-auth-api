@@ -26,7 +26,10 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       return sendError(res, 403, 'Invalid or expired token', 'INVALID_TOKEN');
     }
 
-    req.user = decoded as { id: string };
+    const payload = decoded as { userId?: string; id?: string };
+    req.user = { 
+      id: payload.userId || payload.id!
+    };
     next();
   });
 };
