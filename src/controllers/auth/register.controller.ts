@@ -5,7 +5,8 @@ import { db } from '../../db/index';
 import { usersTable, verificationCodesTable } from '../../db/schema';
 import { registerSchema, type RegisterInput } from '../../validators/auth.validator';
 import { sendResponse, sendError } from '../../utils/responses.utils';
-import { OTP_DURATION } from '../../utils/default';
+import { OTP } from '../../utils/default';
+import { sendVerificationEmail } from '../../utils/auth-emails';
 
 const generateOtpCode = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -47,7 +48,7 @@ export const registerController = async (
     }
 
     const otpCode = generateOtpCode();
-    const expiresAt = new Date(Date.now() + OTP_DURATION); // Set expiration time for the OTP
+    const expiresAt = new Date(Date.now() + OTP.OTP_DURATION); // Set expiration time for the OTP
 
     await db.insert(verificationCodesTable).values({
       userId: newUser.id,
@@ -55,6 +56,8 @@ export const registerController = async (
       type: 'EMAIL_VERIFICATION',
       expiresAt,
     });
+
+    await sendVerificationEmail(newUser.email, otpCode);
 
     return sendResponse(res, 201, 'User registered successfully. Please verify your email.', {
       user: newUser,
