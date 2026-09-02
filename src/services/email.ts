@@ -1,43 +1,48 @@
 import Nodemailer from 'nodemailer';
-import { MailtrapTransport } from 'mailtrap';
+import { OTP } from '../utils/default';
 
-const getMailtrapConfig = () => {
-  const token = process.env.MAILTRAP_API_TOKEN ?? process.env.API_TOKEN;
-  const senderAddress = process.env.MAILTRAP_SENDER_EMAIL;
-  const senderName = process.env.MAILTRAP_SENDER_NAME;
-
-  if (!token || !senderAddress || !senderName) {
-    throw new Error(
-      'Mailtrap configuration is incomplete. Set MAILTRAP_API_TOKEN (or API_TOKEN), MAILTRAP_SENDER_EMAIL, and MAILTRAP_SENDER_NAME.'
-    );
-  }
-
-  return { token, senderAddress, senderName };
-};
-
-export const sendMail = async ( {
+export const sendMail = async ({
   recipientEmail,
   subject,
   text,
   html,
-  category,
 }: {
   recipientEmail: string[];
   subject: string;
   text?: string;
   html?: string;
   category?: string;
-} ) => {
+}) => {
+  try {
+    // 1. Create a test account (or you can cache this if you want a static test inbox)
+    const testAccount = await Nodemailer.createTestAccount();
 
-  const { token, senderAddress, senderName } = getMailtrapConfig();
-  const transport = Nodemailer.createTransport(MailtrapTransport({ token }));
+    const transporter = Nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
 
-  await transport.sendMail({
-    from: { address: senderAddress, name: senderName },
-    to: recipientEmail,
-    subject,
-    text,
-    html,
-    category,
-  });
-} 
+    // 2. Send the mail
+    const info = await transporter.sendMail({
+      from: '"Mobile Auth API" <no-reply@auth.local>',
+      to: recipientEmail.join(', '),
+      subject,
+      text,
+      html,
+    });
+
+    console.log('--------------------------------------------------');
+    console.log(`[Email Service] OTP Email sent successfully to: ${recipientEmail.join(', ')}`);
+    // This gives you the direct URL to click and view the email in your browser!
+    console.log('Preview URL: %s', Nodemailer.getTestMessageUrl(info));
+    console.log('--------------------------------------------------');
+  } catch (error) {
+    console.error('[Email Service] Failed to send email:', error);
+    throw new Error('EMAIL_SEND_FAILED');
+  }
+};

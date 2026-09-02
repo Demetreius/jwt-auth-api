@@ -1,0 +1,29 @@
+paths:
+  /api/users/me:
+    delete:
+      summary: Delete currently authenticated user account
+      description: Permanently deletes the user account and associated verification data. Requires a valid JWT Bearer token.
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Account deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Account deleted successfully
+                  data:
+                    type: object
+                    example: null
+        '401':
+          description: Missing or invalid token.
+        '404':
+          description: User not found.

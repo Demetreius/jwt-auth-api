@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Mobile Auth API
   version: 1.0.0
-  description: Production-grade authentication API for mobile applications.
+  description: Production-grade authentication API.
 
 servers:
   - url: http://localhost:3000
@@ -10,10 +10,20 @@ servers:
 
 tags:
   - name: Auth
-    description: Authentication and verification endpoints
+    description: Authentication, registration, and OTP verification endpoints
+  - name: Users
+    description: User resource management and account lifecycle endpoints
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter your JWT token in the format `Bearer <token>`
 
 paths:
-  # Pulling individual endpoints from docs/paths/auth.yaml
+  # --- Auth Domain --- (from docs/paths/auth.yaml)
   /api/auth/register:
     $ref: './paths/auth.yaml#/paths/~1api~1auth~1register'
 
@@ -22,3 +32,7 @@ paths:
 
   /api/auth/verify-otp:
     $ref: './paths/auth.yaml#/paths/~1api~1auth~1verify-otp'
+
+  # --- User Resource Domain -- (from docs/paths/users.yaml)
+  /api/users/me:
+    $ref: './paths/users.yaml#/paths/~1api~1users~1me'
