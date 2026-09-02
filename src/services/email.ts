@@ -1,7 +1,28 @@
 import Nodemailer from 'nodemailer';
 import { MailtrapTransport } from 'mailtrap';
 
-const getMailtrapConfig = () => {
+
+interface MailTransportOptions {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+}
+
+interface MailConfig {
+  transportOptions: MailTransportOptions;
+  origin: {
+    address: string;
+    name: string;
+  } | string
+}
+
+
+const getMailConfig = async (): Promise<MailConfig> => {
+
   const token = process.env.MAILTRAP_API_TOKEN ?? process.env.API_TOKEN;
   const senderAddress = process.env.MAILTRAP_SENDER_EMAIL;
   const senderName = process.env.MAILTRAP_SENDER_NAME;
@@ -12,7 +33,23 @@ const getMailtrapConfig = () => {
     );
   }
 
-  return { token, senderAddress, senderName };
+  const testAccount = await Nodemailer.createTestAccount();
+
+  return {
+    transportOptions: {
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    },
+    origin: {
+      address: senderAddress,
+      name: senderName,
+    }
+  }
 };
 
 export const sendMail = async ( {
@@ -29,15 +66,16 @@ export const sendMail = async ( {
   category?: string;
 } ) => {
 
-  const { token, senderAddress, senderName } = getMailtrapConfig();
-  const transport = Nodemailer.createTransport(MailtrapTransport({ token }));
+  const { transportOptions, origin } = await getMailConfig();
+
+
+  const transport = Nodemailer.createTransport(transportOptions);
 
   await transport.sendMail({
-    from: { address: senderAddress, name: senderName },
+    from: origin,
     to: recipientEmail,
     subject,
     text,
     html,
-    category,
   });
 } 

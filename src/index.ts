@@ -6,6 +6,7 @@ import path from 'path';
 import 'dotenv/config';
 import authRoutes from './routes/auth.routes';
 import SwaggerParser from '@apidevtools/swagger-parser';
+import userRoutes from './routes/user.routes';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -31,7 +32,7 @@ setupSwagger();
 
 // API Routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/users', userRoutes);
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({
