@@ -1,0 +1,121 @@
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: securePassword123
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+      responses:
+        '201':
+          description: User registered successfully. OTP sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registered successfully.
+                  data:
+                    type: object
+                    example: null
+        '400':
+          description: Validation error or email already in use.
+  /api/auth/login:
+    post:
+      summary: Log in an existing verified user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: securePassword123
+      responses:
+        '200':
+          description: Login successful, returns JWT token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Invalid credentials.
+        '403':
+          description: Account not verified.
+
+  /api/auth/verify-otp:
+    post:
+      summary: Verify email or password reset OTP code
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - code
+                - type
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                code:
+                  type: string
+                  example: "123456"
+                type:
+                  type: string
+                  enum: [EMAIL_VERIFICATION, PASSWORD_RESET]
+                  example: EMAIL_VERIFICATION
+      responses:
+        '200':
+          description: Verification successful.
+        '400':
+          description: Invalid or expired code.
