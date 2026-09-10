@@ -2,6 +2,7 @@ import { type Request, type Response } from 'express';
 import argon2 from 'argon2';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db/index';
+import 'dotenv/config';
 import { usersTable, verificationCodesTable } from '../../db/schema';
 import { registerSchema, type RegisterInput } from '../../validators/auth.validator';
 import { sendResponse, sendError } from '../../utils/responses.utils';
