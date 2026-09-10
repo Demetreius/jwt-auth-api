@@ -23,10 +23,15 @@ export const verifyOtpSchema = z.object({
   type: z.enum(OTP_TYPES),
 });
 
+export const requestPasswordForgotSchema = z.object({
+  email: z.email().min(4, 'The email address is required')
+})
+
 // Infer TypeScript types from Zod schemas
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
+export type RequestPasswordForgotInput = z.infer<typeof requestPasswordForgotSchema>;
 
 export const validate = (schema: z.ZodType) => {
   return (req: Request, res: Response, next: NextFunction) => {
