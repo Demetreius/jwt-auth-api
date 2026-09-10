@@ -39,6 +39,14 @@ export const verificationCodesTable = pgTable('verification_codes', {
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export const validityToken = pgTable("validity_token", {
+    id: uuid('id').defaultRandom().primaryKey(),
+    token: text('token').notNull().unique(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    codeId: uuid('code_id').notNull().references(() => verificationCodesTable.id, { onDelete: 'cascade' }),
+})
+
 
 
 // 4. TypeScript Type Exports

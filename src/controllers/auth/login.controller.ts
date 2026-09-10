@@ -1,4 +1,5 @@
 import { type Request, type Response } from 'express';
+import 'dotenv/config';
 import argon2 from 'argon2';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db/index';
