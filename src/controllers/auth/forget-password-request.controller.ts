@@ -1,7 +1,7 @@
 import { type Request, type Response } from 'express';
 import { eq } from 'drizzle-orm';
 import 'dotenv/config';
-import type { RequestPasswordForgotInput } from "../../validators/auth.validator"
+import type { RequestPasswordResetInput } from "../../validators/auth.validator"
 import { db } from '../../db';
 import { usersTable, verificationCodesTable } from '../../db/schema';
 import { sendError, sendResponse } from '../../utils/responses.utils';
@@ -9,7 +9,7 @@ import { generateOtpCode, OTP } from '../../utils/default';
 import { sendVerificationEmail } from '../../utils/auth-emails';
 
 
-export const forgetPasswordRequestController = async (request: Request<{}, {}, RequestPasswordForgotInput>, response: Response) => {
+export const resetPasswordRequestController = async (request: Request<{}, {}, RequestPasswordResetInput>, response: Response) => {
 
     try {
         const { email } = request.body;

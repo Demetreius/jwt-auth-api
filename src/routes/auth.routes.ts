@@ -6,8 +6,10 @@ import {
   validate, 
   registerSchema, 
   loginSchema, 
-  verifyOtpSchema 
+  verifyOtpSchema, 
+  requestPasswordResetSchema
 } from '../validators/auth.validator.js';
+import { resetPasswordRequestController } from '../controllers/auth/forget-password-request.controller.js';
 
 const router: Router = Router();
 
@@ -19,5 +21,8 @@ router.post('/login', validate(loginSchema), loginController);
 
 // POST /api/auth/verify-otp
 router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpController);
+
+// POST /api/auth/request-pasword-reset
+router.post('/request-password-reset', validate(requestPasswordResetSchema), resetPasswordRequestController);
 
 export default router;
